@@ -6,6 +6,10 @@ from datetime import datetime
 import os
 import time
 
+from google.cloud import bigquery
+from google.oauth2 import service_account
+import pandas_gbq
+
 load_dotenv()
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 if not GITHUB_TOKEN:
@@ -123,12 +127,49 @@ def load(df, db_path="data/repos.db", table_name="repositories"):
     df.to_sql(table_name, engine, if_exists="replace", index=False)
 
     print(f"[INFO]: Loaded {len(df)} rows to db {db_path}, table: {table_name}")
+
+def test_bigq_connection():
+    """
+    Test connection to BigQuery by querying public dataset
+    """
+
+    # credentials from bigquery
+    key_path = "./inlaid-particle-359102-118bdae159e1.json"
+
+    # create credentials from the json
+    credentials = service_account.Credentials.from_service_account_file(
+        key_path,
+        scopes = ["https://www.googleapis.com/auth/cloud-platform"],
+    )
+
+    # create object client
+    client = bigquery.Client(credentials=credentials, project=credentials.project_id)
+
+    # simple query to bigq dataset
+    query = """
+        SELECT name, sum(number) as total
+        FROM `bigquery-public-data.usa_names.usa_1910_current`
+        WHERE state = 'TX'
+        GROUP BY name
+        ORDER BY total DESC
+        LIMIT 5
+    """
+
+    print("[INFO]: Running query from bigquery")
+
+    # running query and convert into pandas DF
+    df_test = client.query(query).to_dataframe()
+
+    print("Connection Sucessful! Query Result: ")
+    print(df_test)
+    return True
     
 
 if __name__ == "__main__":
-    repos = extract()
-    # print("Sample Repos: ", repos[0]["full_name"] if repos else "None")
-    df = transform(repos)
-    # print(df.head())
-    load(df)
-    print("[INFO]: Pipeline completed successfully")
+    # repos = extract()
+    # # print("Sample Repos: ", repos[0]["full_name"] if repos else "None")
+    # df = transform(repos)
+    # # print(df.head())
+    # load(df)
+    # print("[INFO]: Pipeline completed successfully")
+    test_bigq_connection()
