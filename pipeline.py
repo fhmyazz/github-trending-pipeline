@@ -163,13 +163,39 @@ def test_bigq_connection():
     print("Connection Sucessful! Query Result: ")
     print(df_test)
     return True
+
+def load_to_bigq(df, dataset_id="github_data", table_id="repositories"):
+    """
+    Load to DataFrame BigQuery
+    """
+    if df.empty:
+        print("No data to load")
+        return
+
+    key_path = "./inlaid-particle-359102-118bdae159e1.json"
+    project_id = "inlaid-particle-359102"
+    table_ref = f"{project_id}.{dataset_id}.{table_id}"
+
+    credentials = service_account.Credentials.from_service_account_file(key_path)
+
+    print(f"[INFO]: Load {len(df)} rows into {table_ref}")
+    df.to_gbq(
+        destination_table = table_ref,
+        project_id = project_id,
+        credentials = credentials,
+        if_exists = "replace",
+        progress_bar = True
+    )
+
+    print(f"[INFO]: Data successfully loaded to BigQuery!")
     
 
 if __name__ == "__main__":
-    # repos = extract()
+    repos = extract()
     # # print("Sample Repos: ", repos[0]["full_name"] if repos else "None")
-    # df = transform(repos)
+    df = transform(repos)
+    load_to_bigq(df)
     # # print(df.head())
     # load(df)
-    # print("[INFO]: Pipeline completed successfully")
-    test_bigq_connection()
+    print("[INFO]: Pipeline completed successfully")
+    # test_bigq_connection()
