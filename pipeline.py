@@ -98,7 +98,7 @@ def transform(repos):
             logger.info("[INFO]: No data to transform")
             return pd.DataFrame()
 
-        # Buat DataFrame dari list repos
+        # create dataframe from repos
         df = pd.DataFrame([{
             "id": r["id"],
             "name": r["name"],
@@ -138,30 +138,12 @@ def transform(repos):
     except Exception as e:
         logger.exception(f"Unexpected error in transform(): {e}")
 
-# def load(df, db_path="data/repos.db", table_name="repositories"):
-#     """
-#     Load DataFrame into SQLite Database
-#     """
-
-#     if df.empty:
-#         print("[INFO]: No Data to Load")
-#         return
-    
-#     os.makedirs(os.path.dirname(db_path), exist_ok=True)
-
-#     engine = create_engine(f"sqlite:///{db_path}")
-
-#     df.to_sql(table_name, engine, if_exists="replace", index=False)
-
-#     print(f"[INFO]: Loaded {len(df)} rows to db {db_path}, table: {table_name}")
-
 def get_bigq_client():
     credentials = service_account.Credentials.from_service_account_file(
         BIGQUERY_KEY_PATH,
         scopes=["https://www.googleapis.com/auth/cloud-platform"]
     )
     return bigquery.Client(credentials=credentials, project=BIGQUERY_PROJECT_ID)
-
 
 # def test_bigq_connection():
 #     """
@@ -219,7 +201,7 @@ def load_to_bigq(df):
         table_id = f"{dataset_id}.{BIGQUERY_TABLE}"
 
         dataset = bigquery.Dataset(dataset_id)
-        dataset.location = "asia-southeast2"  # Jakarta
+        dataset.location = "asia-southeast2"
         client.create_dataset(dataset, exists_ok=True)
 
         job_config = bigquery.LoadJobConfig(
@@ -230,14 +212,6 @@ def load_to_bigq(df):
         job.result()
 
         logger.info(f"[INFO]: Load {len(df)} rows into {table_id}")
-        # df.to_gbq(
-        #     destination_table = table_ref,
-        #     project_id = project_id,
-        #     credentials = credentials,
-        #     if_exists = "replace",
-        #     progress_bar = True
-        # )
-
         logger.info(f"[INFO]: Data successfully loaded to BigQuery!")
 
     except Exception as e:
@@ -246,10 +220,6 @@ def load_to_bigq(df):
 
 if __name__ == "__main__":
     repos = extract()
-    # # print("Sample Repos: ", repos[0]["full_name"] if repos else "None")
     df = transform(repos)
     load_to_bigq(df)
-    # # print(df.head())
-    # load(df)
     logger.info("[INFO]: Pipeline completed successfully")
-    # test_bigq_connection()
