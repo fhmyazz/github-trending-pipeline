@@ -1,0 +1,7 @@
+2026-06-10 21:30:02,460 - INFO - __main__ - [INFO]: Setup is completed...
+2026-06-10 21:30:02,461 - INFO - __main__ - [INFO]: Starting Extraction...
+2026-06-10 21:30:07,577 - INFO - __main__ - [INFO]: Removed 0 duplicate id
+2026-06-10 21:30:07,582 - INFO - __main__ - Transform completed. 20 rows, 14 columns
+2026-06-10 21:30:12,533 - INFO - __main__ - [INFO]: Load 20 rows into inlaid-particle-359102.github_data.repositories
+2026-06-10 21:30:12,533 - INFO - __main__ - [INFO]: Data successfully loaded to BigQuery!
+2026-06-10 21:30:12,535 - INFO - __main__ - [INFO]: Pipeline completed successfully
