@@ -83,3 +83,4 @@ Destination table:
 ```
 github_data.repositories
 ```
+**🚧 [Airflow-scheduled version](https://github.com/fhmyazz/airflow-de-pipeline/)**
