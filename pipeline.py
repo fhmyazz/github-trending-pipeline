@@ -191,10 +191,6 @@ def load_to_bigq(df):
             logger.info("No data to load")
             return
 
-        # key_path = "./inlaid-particle-359102-118bdae159e1.json"
-        # project_id = "inlaid-particle-359102"
-        # table_ref = f"{project_id}.{dataset_id}.{table_id}"
-
         client = get_bigq_client()
 
         dataset_id = f"{BIGQUERY_PROJECT_ID}.{BIGQUERY_DATASET}"
