@@ -9,10 +9,20 @@ import logging
 from google.cloud import bigquery
 from google.oauth2 import service_account
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
+    handlers=[
+        logging.FileHandler('pipeline.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
 load_dotenv()
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 if not GITHUB_TOKEN:
-    print("GITHUB_TOKEN not found. Please fill in .env file")
+    logger.info("GITHUB_TOKEN not found. Please fill in .env file")
 
 HEADERS = {
     "Authorization": f"Bearer {GITHUB_TOKEN}",
@@ -25,16 +35,6 @@ BIGQUERY_KEY_PATH = "./inlaid-particle-359102-118bdae159e1.json"
 BIGQUERY_PROJECT_ID = "inlaid-particle-359102"
 BIGQUERY_DATASET = "github_data"
 BIGQUERY_TABLE = "repositories"
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
-    handlers=[
-        logging.FileHandler('pipeline.log'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
 
 logger.info("[INFO]: Setup is completed...")
 def extract(language="python", min_stars=1000, max_pages=2, per_page=10):
@@ -56,16 +56,16 @@ def extract(language="python", min_stars=1000, max_pages=2, per_page=10):
 
         for page in range (1, max_pages+1):
             params["page"] = page
-            print(f"[INFO]: Fetching page: {page}")
+            logger.info(f"[INFO]: Fetching page: {page}")
 
             response = requests.get(SEARCH_URL, headers=HEADERS, params=params)
             response.raise_for_status()
 
             remaining = int(response.headers.get("X-RateLimit-Remaining", 0))
-            print(f"[INFO]: Rate limit remaining: {remaining}")
+            logger.info(f"[INFO]: Rate limit remaining: {remaining}")
 
             if response.status_code != 200:
-                print(f"[ERROR]: {response.status_code} {response.text}")
+                logger.info(f"[ERROR]: {response.status_code} {response.text}")
                 break
             
             data = response.json()
@@ -77,7 +77,7 @@ def extract(language="python", min_stars=1000, max_pages=2, per_page=10):
 
             time.sleep(1)
         
-        print(f"[INFO]: Extracted {len(repos)} repos")
+        logger.info(f"[INFO]: Extracted {len(repos)} repos")
         return repos
     
     except requests.exceptions.RequestException as e:
